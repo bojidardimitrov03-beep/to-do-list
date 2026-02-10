@@ -26,5 +26,17 @@
         <h3>Low Priority</h3>
         <div id="lowPriority-tasks"></div>
     </div>
+    <div id="taskModal" class="hidden">
+        <form id="taskForm">
+          <input type="text" id="taskTitle" placeholder="Title" />
+          <input type="text" id="taskDescription" placeholder="Description" />
+          <input type="date" id="taskDueDate" />
+          <select id="taskPriority">
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <button type="submit">Add Task</button>
+          <button type="button" id="cancelTask">Cancel</button>
   </body>
 </html>
