@@ -2,6 +2,7 @@ import appLogic from './appLogic';
 import Todo from './todo';
 import Project from './project';
 import { saveData, loadData } from './storage';
+import {format} from 'date-fns'
 
 const addProjectBtn = document.getElementById("addNewProject");
 const newTaskBtn = document.getElementById("newTask");
@@ -14,7 +15,7 @@ const projectsContainer = document.getElementById('projects');
 const taskModal = document.getElementById('taskModal');
 const closeModalBtn = document.getElementById("cancelTask")
 
-
+let calendarOpen = false
 newTaskBtn.addEventListener('click', () => {
     taskModal.classList.remove('hidden');
   });
@@ -97,4 +98,46 @@ export const renderTasks = () => {
       projectsContainer.appendChild(projectDiv);
     });
   };
-
+  const calendarContainer = document.getElementById('calendarView');
+  calendarViewBtn.addEventListener('click', () => {
+    calendarOpen = !calendarOpen;
+    if (calendarOpen) {
+      highPriorityContainer.classList.add('hidden');
+      mediumPriorityContainer.classList.add('hidden');
+      lowPriorityContainer.classList.add('hidden');
+      calendarContainer.classList.remove('hidden');
+      renderCalendar()
+    } else {
+      highPriorityContainer.classList.remove('hidden');
+      mediumPriorityContainer.classList.remove('hidden');
+      lowPriorityContainer.classList.remove('hidden');
+      calendarContainer.classList.add('hidden');
+    }
+  });
+  export const renderCalendar = () => {
+    calendarContainer.innerHTML = '';
+    
+    const groups = {};
+    appLogic.projects[0].tasks.forEach((task) => {
+      if (!groups[task.dueDate]) {
+        groups[task.dueDate] = [];
+      }
+      groups[task.dueDate].push(task);
+    });
+  
+    Object.keys(groups).forEach((date) => {
+      const dateSection = document.createElement('div');
+      
+      const header = document.createElement('h3');
+      header.textContent = format(new Date(date), 'MMM dd yyyy');
+      dateSection.appendChild(header);
+  
+      groups[date].forEach((task) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.textContent = `${task.title} - ${task.priority} priority`;
+        dateSection.appendChild(taskDiv);
+      });
+  
+      calendarContainer.appendChild(dateSection);
+    });
+  };

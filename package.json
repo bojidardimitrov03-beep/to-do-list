@@ -15,7 +15,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  
   "bugs": {
     "url": "https://github.com/bojidardimitrov03-beep/to-do-list/issues"
   },
@@ -30,5 +29,9 @@
     "webpack": "^5.105.0",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.3"
+  },
+  "dependencies": {
+    "data-fns": "^1.1.0",
+    "date-fns": "^4.1.0"
   }
 }
