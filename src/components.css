@@ -1,0 +1,59 @@
+/* 1. Interactive Elements */
+button {
+    background-color: lightblue;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #87ceeb;
+}
+
+.delete-btn {
+    background-color: #ff6b6b;
+    color: white;
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+/* 2. Task Cards */
+.task-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+/* 3. Modal System */
+#taskModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#taskForm {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

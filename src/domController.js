@@ -189,6 +189,9 @@ export const renderTasks = () => {
       calendarOpen = false;
       calendarContainer.classList.add('hidden');
 
+      todaySidebar.classList.add('sidebar-active');
+      calendarViewBtn.classList.remove('sidebar-active');
+
       highPriorityContainer.classList.add('hidden');
       mediumPriorityContainer.classList.add('hidden');
       lowPriorityContainer.classList.add('hidden');
@@ -198,6 +201,8 @@ export const renderTasks = () => {
       todayContainer.classList.remove('hidden');
       renderToday();
     } else {
+      todaySidebar.classList.remove('sidebar-active');
+
       todayHeading.classList.add('hidden');
       todayContainer.classList.add('hidden');
 
@@ -211,6 +216,9 @@ export const renderTasks = () => {
     calendarOpen = !calendarOpen;
     if (calendarOpen) {
       todayOpen = false;
+      todaySidebar.classList.remove('sidebar-active');
+      calendarViewBtn.classList.add('sidebar-active');
+      todayOpen = false;
       todayHeading.classList.add('hidden');
       todayContainer.classList.add('hidden');
 
@@ -221,6 +229,7 @@ export const renderTasks = () => {
       calendarContainer.classList.remove('hidden');
       renderCalendar()
     } else {
+      calendarViewBtn.classList.remove('sidebar-active');
       highPriorityContainer.classList.remove('hidden');
       mediumPriorityContainer.classList.remove('hidden');
       lowPriorityContainer.classList.remove('hidden');

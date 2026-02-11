@@ -1,7 +1,8 @@
 import appLogic from './appLogic';
 import { loadData } from './storage';
 import { renderProjects, renderTasks } from './domController';
-import './style.css';
+import './layout.css';
+import './components.css';
 import Project from './project';
 import Todo from './todo';
 
