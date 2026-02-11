@@ -8,14 +8,19 @@
 <body>
   <div id="wrapper">
     <div id="sidebar">
+      <h3 id="todaySidebar">Today</h3>
+      <h3 id="calendar">Calendar View</h3>
       <h3>Projects</h3>
-      <div id="projects"></div>
       <button id="addNewProject">Add New Project</button>
+      <div id="projects"></div>
     </div>
 
     <div id="main">
       <button id="newTask">+ New Task</button>
-      <button id="calendar">📅 Calendar View</button>
+
+      <h3 id="todayHeading" class="hidden">Today</h3>
+
+      <div id="today-tasks" class="hidden"></div>
 
       <h3 class="priority-heading">High Priority</h3>
       <div id="highPriority-tasks"></div>

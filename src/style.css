@@ -40,11 +40,15 @@ body {
     color: #aaa;
   }
 
+#todaySidebar {
+  cursor: pointer;
+}
+
   /* Project list layout */
   #projects {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 20px;
   }
 
   .project-item {
@@ -57,12 +61,10 @@ body {
     cursor: pointer;
   }
 
-  .project-details {
-    margin-left: 8px;
-  }
+
 
   .project-delete-btn {
-    margin-left: 12px;
+    
     padding: 4px 8px;
     font-size: 12px;
     background-color: #ff6b6b;
@@ -160,8 +162,11 @@ body {
   .delete-btn {
     background-color: #ff6b6b;
     color: white;
-    font-size: 12px;
-    padding: 5px 10px;
+    font-size: 11px;
+    padding: 3px 8px;
+    align-self: flex-start;
+    width: auto;
+    display: inline-block;
   }
   
   .delete-btn:hover {
@@ -240,3 +245,6 @@ body {
   .calendar-task-details.hidden {
     display: none;
   }
+#calendar{
+    cursor: pointer;
+}
