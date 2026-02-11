@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo App</title>
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo App</title>
+</head>
+<body>
+  <div id="wrapper">
     <div id="sidebar">
-        <button id="addNewProject">Add new Project</button>
-        <h3>Projects</h3>
-        <div id="projects"></div>
-
+      <h3>Projects</h3>
+      <div id="projects"></div>
+      <button id="addNewProject">Add New Project</button>
     </div>
+
     <div id="main">
-        <button id="newTask">+ New Task</button>
-        <button id="calendar">Calendar View</button>
-        <h3>High Priority</h3>
-        <div id="highPriority-tasks">
+      <button id="newTask">+ New Task</button>
+      <button id="calendar">📅 Calendar View</button>
 
-        </div>
-        <h3>Medium Priority</h3>
-        <div id="mediumPriority-tasks">
+      <h3 class="priority-heading">High Priority</h3>
+      <div id="highPriority-tasks"></div>
 
-        </div>
-        <h3>Low Priority</h3>
-        <div id="lowPriority-tasks"></div>
-        <div id="calendarView"></div>
+      <h3 class="priority-heading">Medium Priority</h3>
+      <div id="mediumPriority-tasks"></div>
+
+      <h3 class="priority-heading">Low Priority</h3>
+      <div id="lowPriority-tasks"></div>
+
+      <div id="calendarView" class="hidden"></div>
     </div>
-    <div id="taskModal" class="hidden">
-        <form id="taskForm">
-          <input type="text" id="taskTitle" placeholder="Title" />
-          <input type="text" id="taskDescription" placeholder="Description" />
-          <input type="date" id="taskDueDate" />
-          <select id="taskPriority">
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-          <button type="submit">Add Task</button>
-          <button type="button" id="cancelTask">Cancel</button>
-  </body>
+  </div>
+
+  <div id="taskModal" class="hidden">
+    <form id="taskForm">
+      <input type="text" id="taskTitle" placeholder="Title" />
+      <input type="text" id="taskDescription" placeholder="Description" />
+      <input type="date" id="taskDueDate" />
+      <select id="taskPriority">
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <button type="submit">Add Task</button>
+      <button type="button" id="cancelTask">Cancel</button>
+    </form>
+  </div>
+</body>
 </html>
