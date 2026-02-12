@@ -1,53 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Todo App</title>
-</head>
-<body>
-  <div id="wrapper">
-    <div id="sidebar">
-      <h3 id="todaySidebar">Today</h3>
-      <h3 id="calendar">Calendar View</h3>
-      <h3>Projects</h3>
-      <button id="addNewProject">Add New Project</button>
-      <div id="projects"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo App</title>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="sidebar">
+        <h3 id="todaySidebar">Today</h3>
+        <h3 id="calendar">Calendar View</h3>
+        <h3 id="completedSidebar">Completed</h3>
+        <h3 id="projectsHeading">Projects</h3>
+        <div id="projects" class="hidden"></div>
+        <button id="addNewProject">Add New Project</button>
+      </div>
+
+      <div id="main">
+        <h3 id="todayHeading" class="hidden">Today</h3>
+        <div id="today-tasks" class="hidden"></div>
+
+        <h3 id="completedHeading" class="hidden">Completed</h3>
+        <div id="completed-tasks" class="hidden"></div>
+
+        <div id="tasks"></div>
+
+        <div id="calendarView" class="hidden"></div>
+
+        <button id="newTask">+ New Task</button>
+      </div>
     </div>
 
-    <div id="main">
-      <button id="newTask">+ New Task</button>
-
-      <h3 id="todayHeading" class="hidden">Today</h3>
-
-      <div id="today-tasks" class="hidden"></div>
-
-      <h3 class="priority-heading">High Priority</h3>
-      <div id="highPriority-tasks"></div>
-
-      <h3 class="priority-heading">Medium Priority</h3>
-      <div id="mediumPriority-tasks"></div>
-
-      <h3 class="priority-heading">Low Priority</h3>
-      <div id="lowPriority-tasks"></div>
-
-      <div id="calendarView" class="hidden"></div>
+    <div id="taskModal" class="hidden">
+      <form id="taskForm">
+        <input type="text" id="taskTitle" placeholder="Title" />
+        <input type="text" id="taskDescription" placeholder="Description" />
+        <input type="date" id="taskDueDate" />
+        <select id="taskPriority">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <button type="submit">Add Task</button>
+        <button type="button" id="cancelTask">Cancel</button>
+      </form>
     </div>
-  </div>
-
-  <div id="taskModal" class="hidden">
-    <form id="taskForm">
-      <input type="text" id="taskTitle" placeholder="Title" />
-      <input type="text" id="taskDescription" placeholder="Description" />
-      <input type="date" id="taskDueDate" />
-      <select id="taskPriority">
-        <option value="high">High</option>
-        <option value="medium">Medium</option>
-        <option value="low">Low</option>
-      </select>
-      <button type="submit">Add Task</button>
-      <button type="button" id="cancelTask">Cancel</button>
-    </form>
-  </div>
-</body>
+  </body>
 </html>

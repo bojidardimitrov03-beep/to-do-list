@@ -1,381 +1,574 @@
-import appLogic from './appLogic';
-import Todo from './todo';
-import Project from './project';
-import { saveData, loadData } from './storage';
-import {format} from 'date-fns'
+import { format } from "date-fns";
+import appLogic from "./appLogic";
+import Project from "./project";
+import { saveData } from "./storage";
+import Todo from "./todo";
 
 const addProjectBtn = document.getElementById("addNewProject");
 const newTaskBtn = document.getElementById("newTask");
 const calendarViewBtn = document.getElementById("calendar");
-const todaySidebar = document.getElementById('todaySidebar');
+const todaySidebar = document.getElementById("todaySidebar");
+const completedSidebar = document.getElementById("completedSidebar");
+const projectsHeading = document.getElementById("projectsHeading");
 
-const highPriorityContainer = document.getElementById('highPriority-tasks');
-const mediumPriorityContainer = document.getElementById('mediumPriority-tasks');
-const lowPriorityContainer = document.getElementById('lowPriority-tasks');
-const projectsContainer = document.getElementById('projects');
-const taskModal = document.getElementById('taskModal');
-const closeModalBtn = document.getElementById("cancelTask")
-const priorityHeadings = document.querySelectorAll('.priority-heading');
-const todayHeading = document.getElementById('todayHeading');
-const todayContainer = document.getElementById('today-tasks');
+const tasksContainer = document.getElementById("tasks");
+const projectsContainer = document.getElementById("projects");
+const taskModal = document.getElementById("taskModal");
+const closeModalBtn = document.getElementById("cancelTask");
+const todayHeading = document.getElementById("todayHeading");
+const todayContainer = document.getElementById("today-tasks");
+const completedHeading = document.getElementById("completedHeading");
+const completedContainer = document.getElementById("completed-tasks");
 
 let calendarOpen = false;
 let todayOpen = false;
-newTaskBtn.addEventListener('click', () => {
-    taskModal.classList.remove('hidden');
-  });
+let completedOpen = false;
 
-closeModalBtn.addEventListener("click",  ()=> {
-    taskModal.classList.add("hidden");
+// Ensure projects list starts collapsed, even if HTML/CSS cache is stale
+projectsContainer.classList.add("hidden");
+newTaskBtn.addEventListener("click", () => {
+  taskModal.classList.remove("hidden");
+});
 
-})
+closeModalBtn.addEventListener("click", () => {
+  taskModal.classList.add("hidden");
+});
 
-const taskForm = document.getElementById('taskForm');
+const taskForm = document.getElementById("taskForm");
 
-taskForm.addEventListener('submit', (e) => {
-    e.preventDefault(); 
-  
-    const title = document.getElementById('taskTitle').value;
-    const description = document.getElementById('taskDescription').value;
-    const dueDate = document.getElementById('taskDueDate').value;
-    const priority = document.getElementById('taskPriority').value;
+taskForm.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-    if (appLogic.projects.length === 0) {
-      // Safety fallback: tasks require at least one project.
-      appLogic.addProject(new Project('home'));
-    }
+  const title = document.getElementById("taskTitle").value;
+  const description = document.getElementById("taskDescription").value;
+  const dueDate = document.getElementById("taskDueDate").value;
+  const priority = document.getElementById("taskPriority").value;
 
-    const todo = new Todo(title, description, dueDate, priority);
-    appLogic.projects[0].addTask(todo);
-    saveData(appLogic);
+  if (appLogic.projects.length === 0) {
+    // Safety fallback: tasks require at least one project.
+    appLogic.addProject(new Project("home"));
+  }
 
-    taskModal.classList.add("hidden");
-    taskForm.reset();
-    if (calendarOpen) {
-      renderCalendar();
-    } else if (todayOpen) {
-      renderToday();
-    } else {
-      renderTasks();
-    }
-  });
+  const todo = new Todo(title, description, dueDate, priority);
+  appLogic.projects[0].addTask(todo);
+  saveData(appLogic);
+
+  taskModal.classList.add("hidden");
+  taskForm.reset();
+  if (calendarOpen) {
+    renderCalendar();
+  } else if (todayOpen) {
+    renderToday();
+  } else {
+    renderTasks();
+  }
+});
 
 export const renderTasks = () => {
-    highPriorityContainer.innerHTML = '';
-    mediumPriorityContainer.innerHTML = '';
-    lowPriorityContainer.innerHTML = '';
+  tasksContainer.innerHTML = "";
 
-    if (appLogic.projects.length === 0) return;
-  
-    appLogic.projects[0].tasks.forEach((task,index) => {
-      const taskDiv = document.createElement('div');
-      taskDiv.classList.add('task-card');
+  if (appLogic.projects.length === 0) return;
 
-      const taskHeader = document.createElement('div');
-      taskHeader.classList.add('task-header');
-  
-      const taskTitle = document.createElement('span');
-      taskTitle.classList.add('task-title');
-      taskTitle.textContent = task.title;
+  appLogic.projects[0].tasks.forEach((task, index) => {
+    if (task.completed) return;
 
-      taskHeader.appendChild(taskTitle);
-      taskDiv.appendChild(taskHeader);
+    const taskDiv = document.createElement("div");
+    taskDiv.classList.add("task-card");
 
-      const taskDetails = document.createElement('div');
-      taskDetails.classList.add('task-details', 'hidden');
-
-      const taskDescription = document.createElement('p');
-      taskDescription.classList.add('task-description');
-      taskDescription.textContent = task.description;
-
-      const taskDate = document.createElement('span');
-      taskDate.classList.add('task-date');
-      taskDate.textContent = `Due: ${task.dueDate}`;
-
-      const taskPriority = document.createElement('span');
-      taskPriority.classList.add('task-priority');
-      taskPriority.textContent = `Priority: ${task.priority}`;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.classList.add('delete-btn');
-      deleteBtn.textContent = 'Delete';
-
-      deleteBtn.addEventListener('click', () => {
-        appLogic.projects[0].removeTask(index);
-        saveData(appLogic);
-        renderTasks();
-      });
-
-      taskDetails.appendChild(taskDescription);
-      taskDetails.appendChild(taskDate);
-      taskDetails.appendChild(taskPriority);
-      taskDetails.appendChild(deleteBtn);
-
-      taskDiv.appendChild(taskDetails);
-
-      taskTitle.addEventListener('click', () => {
-        taskDetails.classList.toggle('hidden');
-      });
-
-        if (task.priority === 'high') {
-          highPriorityContainer.appendChild(taskDiv);
-        } else if (task.priority === 'medium') {
-          mediumPriorityContainer.appendChild(taskDiv);
-        } else if (task.priority === 'low') {
-          lowPriorityContainer.appendChild(taskDiv);
-        }
-    });
-  };
-
-  addProjectBtn.addEventListener('click', () => {
-    const name = prompt('Enter project name:');
-    if (!name) return;
-    const project = new Project(name);
-    appLogic.addProject(project);
-    saveData(appLogic);
-    renderProjects();
-  });
-
-  export const renderProjects = () => {
-    projectsContainer.innerHTML = '';
-    appLogic.projects.forEach((project, index) => {
-      const projectDiv = document.createElement('div');
-      projectDiv.classList.add('project-item');
-
-      const projectHeader = document.createElement('div');
-      projectHeader.classList.add('project-header');
-
-      const projectName = document.createElement('span');
-      projectName.classList.add('project-name');
-      projectName.textContent = project.name;
-
-      projectHeader.appendChild(projectName);
-      projectDiv.appendChild(projectHeader);
-
-      const projectDetails = document.createElement('div');
-      projectDetails.classList.add('project-details', 'hidden');
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = 'Delete Project';
-      deleteBtn.classList.add('project-delete-btn');
-      deleteBtn.addEventListener('click', () => {
-        if (appLogic.projects.length === 1) {
-          alert('You must have at least one project.');
-          return;
-        }
-        appLogic.removeProject(index);
-        saveData(appLogic);
-        renderProjects();
-        renderTasks();
-      });
-
-      projectDetails.appendChild(deleteBtn);
-      projectDiv.appendChild(projectDetails);
-
-      projectName.addEventListener('click', () => {
-        projectDetails.classList.toggle('hidden');
-      });
-
-      projectsContainer.appendChild(projectDiv);
-    });
-  };
-
-  const calendarContainer = document.getElementById('calendarView');
-
-  todaySidebar.addEventListener('click', () => {
-    todayOpen = !todayOpen;
-
-    if (todayOpen) {
-      calendarOpen = false;
-      calendarContainer.classList.add('hidden');
-
-      todaySidebar.classList.add('sidebar-active');
-      calendarViewBtn.classList.remove('sidebar-active');
-
-      highPriorityContainer.classList.add('hidden');
-      mediumPriorityContainer.classList.add('hidden');
-      lowPriorityContainer.classList.add('hidden');
-      priorityHeadings.forEach((heading) => heading.classList.add('hidden'));
-
-      todayHeading.classList.remove('hidden');
-      todayContainer.classList.remove('hidden');
-      renderToday();
-    } else {
-      todaySidebar.classList.remove('sidebar-active');
-
-      todayHeading.classList.add('hidden');
-      todayContainer.classList.add('hidden');
-
-      highPriorityContainer.classList.remove('hidden');
-      mediumPriorityContainer.classList.remove('hidden');
-      lowPriorityContainer.classList.remove('hidden');
-      priorityHeadings.forEach((heading) => heading.classList.remove('hidden'));
+    if (task.priority === "high") {
+      taskDiv.classList.add("priority-high");
+    } else if (task.priority === "medium") {
+      taskDiv.classList.add("priority-medium");
+    } else if (task.priority === "low") {
+      taskDiv.classList.add("priority-low");
     }
-  });
-  calendarViewBtn.addEventListener('click', () => {
-    calendarOpen = !calendarOpen;
-    if (calendarOpen) {
-      todayOpen = false;
-      todaySidebar.classList.remove('sidebar-active');
-      calendarViewBtn.classList.add('sidebar-active');
-      todayOpen = false;
-      todayHeading.classList.add('hidden');
-      todayContainer.classList.add('hidden');
 
-      highPriorityContainer.classList.add('hidden');
-      mediumPriorityContainer.classList.add('hidden');
-      lowPriorityContainer.classList.add('hidden');
-      priorityHeadings.forEach((heading) => heading.classList.add('hidden'));
-      calendarContainer.classList.remove('hidden');
-      renderCalendar()
-    } else {
-      calendarViewBtn.classList.remove('sidebar-active');
-      highPriorityContainer.classList.remove('hidden');
-      mediumPriorityContainer.classList.remove('hidden');
-      lowPriorityContainer.classList.remove('hidden');
-      priorityHeadings.forEach((heading) => heading.classList.remove('hidden'));
-      calendarContainer.classList.add('hidden');
-    }
-  });
+    const taskHeader = document.createElement("div");
+    taskHeader.classList.add("task-header");
 
-  export const renderToday = () => {
-    todayContainer.innerHTML = '';
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.classList.add("task-checkbox");
+    checkbox.checked = !!task.completed;
 
-    if (appLogic.projects.length === 0) return;
-
-    const today = format(new Date(), 'yyyy-MM-dd');
-
-    appLogic.projects[0].tasks.forEach((task, index) => {
-      if (task.dueDate !== today) return;
-
-      const taskDiv = document.createElement('div');
-      taskDiv.classList.add('task-card');
-
-      const taskHeader = document.createElement('div');
-      taskHeader.classList.add('task-header');
-
-      const taskTitle = document.createElement('span');
-      taskTitle.classList.add('task-title');
-      taskTitle.textContent = task.title;
-
-      taskHeader.appendChild(taskTitle);
-      taskDiv.appendChild(taskHeader);
-
-      const taskDetails = document.createElement('div');
-      taskDetails.classList.add('task-details', 'hidden');
-
-      const taskDescription = document.createElement('p');
-      taskDescription.classList.add('task-description');
-      taskDescription.textContent = task.description;
-
-      const taskDate = document.createElement('span');
-      taskDate.classList.add('task-date');
-      taskDate.textContent = `Due: ${task.dueDate}`;
-
-      const taskPriority = document.createElement('span');
-      taskPriority.classList.add('task-priority');
-      taskPriority.textContent = `Priority: ${task.priority}`;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.classList.add('delete-btn');
-      deleteBtn.textContent = 'Delete';
-
-      deleteBtn.addEventListener('click', () => {
-        appLogic.projects[0].removeTask(index);
-        saveData(appLogic);
+    checkbox.addEventListener("change", () => {
+      task.completed = checkbox.checked;
+      saveData(appLogic);
+      if (calendarOpen) {
+        renderCalendar();
+      } else if (todayOpen) {
         renderToday();
+      } else if (completedOpen) {
+        renderCompleted();
+      } else {
+        renderTasks();
+      }
+    });
+
+    const taskTitle = document.createElement("span");
+    taskTitle.classList.add("task-title");
+    taskTitle.textContent = task.title;
+
+    taskHeader.appendChild(checkbox);
+    taskHeader.appendChild(taskTitle);
+    taskDiv.appendChild(taskHeader);
+
+    const taskDetails = document.createElement("div");
+    taskDetails.classList.add("task-details", "hidden");
+
+    const taskDescription = document.createElement("p");
+    taskDescription.classList.add("task-description");
+    taskDescription.textContent = task.description;
+
+    const taskDate = document.createElement("span");
+    taskDate.classList.add("task-date");
+    taskDate.textContent = `Due: ${task.dueDate}`;
+
+    const taskPriority = document.createElement("span");
+    taskPriority.classList.add("task-priority");
+    taskPriority.textContent = `Priority: ${task.priority}`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("delete-btn");
+    deleteBtn.textContent = "Delete";
+
+    deleteBtn.addEventListener("click", () => {
+      appLogic.projects[0].removeTask(index);
+      saveData(appLogic);
+      renderTasks();
+    });
+
+    taskDetails.appendChild(taskDescription);
+    taskDetails.appendChild(taskDate);
+    taskDetails.appendChild(taskPriority);
+    taskDetails.appendChild(deleteBtn);
+
+    taskDiv.appendChild(taskDetails);
+
+    taskTitle.addEventListener("click", () => {
+      taskDetails.classList.toggle("hidden");
+    });
+
+    tasksContainer.appendChild(taskDiv);
+  });
+};
+
+addProjectBtn.addEventListener("click", () => {
+  const name = prompt("Enter project name:");
+  if (!name) return;
+  const project = new Project(name);
+  appLogic.addProject(project);
+  saveData(appLogic);
+  renderProjects();
+});
+
+export const renderProjects = () => {
+  projectsContainer.innerHTML = "";
+  appLogic.projects.forEach((project, index) => {
+    const projectDiv = document.createElement("div");
+    projectDiv.classList.add("project-item");
+
+    const projectHeader = document.createElement("div");
+    projectHeader.classList.add("project-header");
+
+    const projectName = document.createElement("span");
+    projectName.classList.add("project-name");
+    projectName.textContent = project.name;
+
+    projectHeader.appendChild(projectName);
+    projectDiv.appendChild(projectHeader);
+
+    const projectDetails = document.createElement("div");
+    projectDetails.classList.add("project-details", "hidden");
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete Project";
+    deleteBtn.classList.add("project-delete-btn");
+    deleteBtn.addEventListener("click", () => {
+      if (appLogic.projects.length === 1) {
+        alert("You must have at least one project.");
+        return;
+      }
+      appLogic.removeProject(index);
+      saveData(appLogic);
+      renderProjects();
+      renderTasks();
+    });
+
+    projectDetails.appendChild(deleteBtn);
+    projectDiv.appendChild(projectDetails);
+
+    projectName.addEventListener("click", () => {
+      projectDetails.classList.toggle("hidden");
+    });
+
+    projectsContainer.appendChild(projectDiv);
+  });
+};
+
+const calendarContainer = document.getElementById("calendarView");
+
+todaySidebar.addEventListener("click", () => {
+  todayOpen = !todayOpen;
+
+  if (todayOpen) {
+    calendarOpen = false;
+    completedOpen = false;
+    calendarContainer.classList.add("hidden");
+
+    todaySidebar.classList.add("sidebar-active");
+    calendarViewBtn.classList.remove("sidebar-active");
+    completedSidebar.classList.remove("sidebar-active");
+
+    tasksContainer.classList.add("hidden");
+    completedHeading.classList.add("hidden");
+    completedContainer.classList.add("hidden");
+
+    todayHeading.classList.remove("hidden");
+    todayContainer.classList.remove("hidden");
+    renderToday();
+  } else {
+    todaySidebar.classList.remove("sidebar-active");
+
+    todayHeading.classList.add("hidden");
+    todayContainer.classList.add("hidden");
+
+    tasksContainer.classList.remove("hidden");
+  }
+});
+calendarViewBtn.addEventListener("click", () => {
+  calendarOpen = !calendarOpen;
+  if (calendarOpen) {
+    todayOpen = false;
+    completedOpen = false;
+    todaySidebar.classList.remove("sidebar-active");
+    completedSidebar.classList.remove("sidebar-active");
+    calendarViewBtn.classList.add("sidebar-active");
+    todayHeading.classList.add("hidden");
+    todayContainer.classList.add("hidden");
+    completedHeading.classList.add("hidden");
+    completedContainer.classList.add("hidden");
+
+    tasksContainer.classList.add("hidden");
+    calendarContainer.classList.remove("hidden");
+    renderCalendar();
+  } else {
+    calendarViewBtn.classList.remove("sidebar-active");
+    tasksContainer.classList.remove("hidden");
+    calendarContainer.classList.add("hidden");
+  }
+});
+
+projectsHeading.addEventListener("click", () => {
+  // Toggle visibility of the projects list
+  if (projectsContainer) {
+    projectsContainer.classList.toggle("hidden");
+  }
+});
+
+completedSidebar.addEventListener("click", () => {
+  completedOpen = !completedOpen;
+
+  if (completedOpen) {
+    todayOpen = false;
+    calendarOpen = false;
+
+    todaySidebar.classList.remove("sidebar-active");
+    calendarViewBtn.classList.remove("sidebar-active");
+    completedSidebar.classList.add("sidebar-active");
+
+    todayHeading.classList.add("hidden");
+    todayContainer.classList.add("hidden");
+    calendarContainer.classList.add("hidden");
+    tasksContainer.classList.add("hidden");
+
+    completedHeading.classList.remove("hidden");
+    completedContainer.classList.remove("hidden");
+    renderCompleted();
+  } else {
+    completedSidebar.classList.remove("sidebar-active");
+    completedHeading.classList.add("hidden");
+    completedContainer.classList.add("hidden");
+    tasksContainer.classList.remove("hidden");
+  }
+});
+
+export const renderToday = () => {
+  todayContainer.innerHTML = "";
+
+  if (appLogic.projects.length === 0) return;
+
+  const today = format(new Date(), "yyyy-MM-dd");
+
+  appLogic.projects[0].tasks.forEach((task, index) => {
+    if (task.dueDate !== today || task.completed) return;
+
+    const taskDiv = document.createElement("div");
+    taskDiv.classList.add("task-card");
+
+    const taskHeader = document.createElement("div");
+    taskHeader.classList.add("task-header");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.classList.add("task-checkbox");
+    checkbox.checked = !!task.completed;
+
+    checkbox.addEventListener("change", () => {
+      task.completed = checkbox.checked;
+      saveData(appLogic);
+      if (calendarOpen) {
+        renderCalendar();
+      } else if (todayOpen) {
+        renderToday();
+      } else if (completedOpen) {
+        renderCompleted();
+      } else {
+        renderTasks();
+      }
+    });
+
+    const taskTitle = document.createElement("span");
+    taskTitle.classList.add("task-title");
+    taskTitle.textContent = task.title;
+
+    taskHeader.appendChild(checkbox);
+    taskHeader.appendChild(taskTitle);
+    taskDiv.appendChild(taskHeader);
+
+    const taskDetails = document.createElement("div");
+    taskDetails.classList.add("task-details", "hidden");
+
+    const taskDescription = document.createElement("p");
+    taskDescription.classList.add("task-description");
+    taskDescription.textContent = task.description;
+
+    const taskDate = document.createElement("span");
+    taskDate.classList.add("task-date");
+    taskDate.textContent = `Due: ${task.dueDate}`;
+
+    const taskPriority = document.createElement("span");
+    taskPriority.classList.add("task-priority");
+    taskPriority.textContent = `Priority: ${task.priority}`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("delete-btn");
+    deleteBtn.textContent = "Delete";
+
+    deleteBtn.addEventListener("click", () => {
+      appLogic.projects[0].removeTask(index);
+      saveData(appLogic);
+      renderToday();
+    });
+
+    taskDetails.appendChild(taskDescription);
+    taskDetails.appendChild(taskDate);
+    taskDetails.appendChild(taskPriority);
+    taskDetails.appendChild(deleteBtn);
+
+    taskDiv.appendChild(taskDetails);
+
+    taskTitle.addEventListener("click", () => {
+      taskDetails.classList.toggle("hidden");
+    });
+
+    todayContainer.appendChild(taskDiv);
+  });
+};
+
+export const renderCompleted = () => {
+  completedContainer.innerHTML = "";
+
+  if (appLogic.projects.length === 0) return;
+
+  appLogic.projects[0].tasks.forEach((task, index) => {
+    if (!task.completed) return;
+
+    const taskDiv = document.createElement("div");
+    taskDiv.classList.add("task-card");
+
+    if (task.priority === "high") {
+      taskDiv.classList.add("priority-high");
+    } else if (task.priority === "medium") {
+      taskDiv.classList.add("priority-medium");
+    } else if (task.priority === "low") {
+      taskDiv.classList.add("priority-low");
+    }
+
+    const taskHeader = document.createElement("div");
+    taskHeader.classList.add("task-header");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.classList.add("task-checkbox");
+    checkbox.checked = !!task.completed;
+
+    checkbox.addEventListener("change", () => {
+      task.completed = checkbox.checked;
+      saveData(appLogic);
+      if (completedOpen) {
+        renderCompleted();
+      } else if (calendarOpen) {
+        renderCalendar();
+      } else if (todayOpen) {
+        renderToday();
+      } else {
+        renderTasks();
+      }
+    });
+
+    const taskTitle = document.createElement("span");
+    taskTitle.classList.add("task-title");
+    taskTitle.textContent = task.title;
+
+    taskHeader.appendChild(checkbox);
+    taskHeader.appendChild(taskTitle);
+    taskDiv.appendChild(taskHeader);
+
+    const taskDetails = document.createElement("div");
+    taskDetails.classList.add("task-details", "hidden");
+
+    const taskDescription = document.createElement("p");
+    taskDescription.classList.add("task-description");
+    taskDescription.textContent = task.description;
+
+    const taskDate = document.createElement("span");
+    taskDate.classList.add("task-date");
+    taskDate.textContent = `Due: ${task.dueDate}`;
+
+    const taskPriority = document.createElement("span");
+    taskPriority.classList.add("task-priority");
+    taskPriority.textContent = `Priority: ${task.priority}`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("delete-btn");
+    deleteBtn.textContent = "Delete";
+
+    deleteBtn.addEventListener("click", () => {
+      appLogic.projects[0].removeTask(index);
+      saveData(appLogic);
+      renderCompleted();
+    });
+
+    taskDetails.appendChild(taskDescription);
+    taskDetails.appendChild(taskDate);
+    taskDetails.appendChild(taskPriority);
+    taskDetails.appendChild(deleteBtn);
+
+    taskDiv.appendChild(taskDetails);
+
+    taskTitle.addEventListener("click", () => {
+      taskDetails.classList.toggle("hidden");
+    });
+
+    completedContainer.appendChild(taskDiv);
+  });
+};
+
+export const renderCalendar = () => {
+  calendarContainer.innerHTML = "";
+
+  if (appLogic.projects.length === 0) return;
+
+  const groups = {};
+  appLogic.projects[0].tasks.forEach((task) => {
+    if (task.completed) return;
+    if (!groups[task.dueDate]) {
+      groups[task.dueDate] = [];
+    }
+    groups[task.dueDate].push(task);
+  });
+
+  Object.keys(groups).forEach((date) => {
+    const dateSection = document.createElement("div");
+    dateSection.classList.add("calendar-date-section");
+
+    const header = document.createElement("h3");
+    header.classList.add("calendar-date-header");
+    header.textContent = format(new Date(date), "MMM dd yyyy");
+    dateSection.appendChild(header);
+
+    const dateDetails = document.createElement("div");
+    dateDetails.classList.add("calendar-date-details");
+
+    groups[date].forEach((task) => {
+      const taskDiv = document.createElement("div");
+      taskDiv.classList.add("calendar-task");
+
+      if (task.priority === "high") {
+        taskDiv.classList.add("priority-high");
+      } else if (task.priority === "medium") {
+        taskDiv.classList.add("priority-medium");
+      } else if (task.priority === "low") {
+        taskDiv.classList.add("priority-low");
+      }
+
+      const taskHeader = document.createElement("div");
+      taskHeader.classList.add("calendar-task-header");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.classList.add("task-checkbox");
+      checkbox.checked = !!task.completed;
+
+      checkbox.addEventListener("change", () => {
+        task.completed = checkbox.checked;
+        saveData(appLogic);
+        if (calendarOpen) {
+          renderCalendar();
+        } else if (todayOpen) {
+          renderToday();
+        } else if (completedOpen) {
+          renderCompleted();
+        } else {
+          renderTasks();
+        }
+      });
+
+      const taskTitle = document.createElement("span");
+      taskTitle.classList.add("calendar-task-title");
+      taskTitle.textContent = task.title;
+
+      taskHeader.appendChild(checkbox);
+      taskHeader.appendChild(taskTitle);
+      taskDiv.appendChild(taskHeader);
+
+      const taskDetails = document.createElement("div");
+      taskDetails.classList.add("calendar-task-details", "hidden");
+
+      const taskDescription = document.createElement("p");
+      taskDescription.textContent = task.description;
+
+      const taskMeta = document.createElement("span");
+      taskMeta.textContent = `Due: ${task.dueDate} • Priority: ${task.priority}`;
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.classList.add("delete-btn");
+      deleteBtn.textContent = "Delete";
+
+      deleteBtn.addEventListener("click", () => {
+        const idx = appLogic.projects[0].tasks.indexOf(task);
+        if (idx !== -1) {
+          appLogic.projects[0].removeTask(idx);
+          saveData(appLogic);
+          renderCalendar();
+        }
       });
 
       taskDetails.appendChild(taskDescription);
-      taskDetails.appendChild(taskDate);
-      taskDetails.appendChild(taskPriority);
+      taskDetails.appendChild(taskMeta);
       taskDetails.appendChild(deleteBtn);
 
       taskDiv.appendChild(taskDetails);
 
-      taskTitle.addEventListener('click', () => {
-        taskDetails.classList.toggle('hidden');
+      taskTitle.addEventListener("click", () => {
+        taskDetails.classList.toggle("hidden");
       });
 
-      todayContainer.appendChild(taskDiv);
+      dateDetails.appendChild(taskDiv);
     });
-  };
 
-  export const renderCalendar = () => {
-    calendarContainer.innerHTML = '';
-
-    if (appLogic.projects.length === 0) return;
-
-    const groups = {};
-    appLogic.projects[0].tasks.forEach((task) => {
-      if (!groups[task.dueDate]) {
-        groups[task.dueDate] = [];
-      }
-      groups[task.dueDate].push(task);
-    });
-  
-    Object.keys(groups).forEach((date) => {
-      const dateSection = document.createElement('div');
-      dateSection.classList.add('calendar-date-section');
-      
-      const header = document.createElement('h3');
-      header.classList.add('calendar-date-header');
-      header.textContent = format(new Date(date), 'MMM dd yyyy');
-      dateSection.appendChild(header);
-
-      const dateDetails = document.createElement('div');
-      dateDetails.classList.add('calendar-date-details');
-  
-      groups[date].forEach((task) => {
-        const taskDiv = document.createElement('div');
-        taskDiv.classList.add('calendar-task');
-
-        const taskHeader = document.createElement('div');
-        taskHeader.classList.add('calendar-task-header');
-
-        const taskTitle = document.createElement('span');
-        taskTitle.classList.add('calendar-task-title');
-        taskTitle.textContent = task.title;
-
-        taskHeader.appendChild(taskTitle);
-        taskDiv.appendChild(taskHeader);
-
-        const taskDetails = document.createElement('div');
-        taskDetails.classList.add('calendar-task-details', 'hidden');
-
-        const taskDescription = document.createElement('p');
-        taskDescription.textContent = task.description;
-
-        const taskMeta = document.createElement('span');
-        taskMeta.textContent = `Due: ${task.dueDate} • Priority: ${task.priority}`;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.classList.add('delete-btn');
-        deleteBtn.textContent = 'Delete';
-
-        deleteBtn.addEventListener('click', () => {
-          const idx = appLogic.projects[0].tasks.indexOf(task);
-          if (idx !== -1) {
-            appLogic.projects[0].removeTask(idx);
-            saveData(appLogic);
-            renderCalendar();
-          }
-        });
-
-        taskDetails.appendChild(taskDescription);
-        taskDetails.appendChild(taskMeta);
-        taskDetails.appendChild(deleteBtn);
-
-        taskDiv.appendChild(taskDetails);
-
-        taskTitle.addEventListener('click', () => {
-          taskDetails.classList.toggle('hidden');
-        });
-
-        dateDetails.appendChild(taskDiv);
-      }); 
-
-      dateSection.appendChild(dateDetails);
-      calendarContainer.appendChild(dateSection);
-    });
-  };
+    dateSection.appendChild(dateDetails);
+    calendarContainer.appendChild(dateSection);
+  });
+};
